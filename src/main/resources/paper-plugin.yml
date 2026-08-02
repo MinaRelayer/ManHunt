@@ -1,0 +1,15 @@
+name: ManHunt
+version: '${version}'
+main: me.mina.manhunt.ManhuntPlugin
+api-version: '26.1'
+description: ManHunt hunter vs runner mini-game plugin
+author: MinaRelayer
+dependencies:
+  server:
+    PlaceholderAPI:
+      load: OMIT
+      required: false
+permissions:
+  manhunt.admin:
+    description: Allows admin operations (start/stop/reload and assigning players to teams)
+    default: op

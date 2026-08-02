@@ -1,0 +1,17 @@
+# ManHunt configuration
+language: zh_cn
+
+world:
+  # Namespace for temporary worlds. Only lowercase letters, digits, '.', '_' and '-' are allowed.
+  namespace: manhunt
+  # Use "random" for a new seed every match, or set an integer seed.
+  seed: random
+  difficulty: HARD
+
+game:
+  # Seconds an offline runner remains alive before elimination. 0 = immediate elimination.
+  disconnect-grace-seconds: 300
+
+scoreboard:
+  # Refresh interval for the three text lines.
+  refresh-ticks: 20
