@@ -10,12 +10,13 @@ import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
-import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -32,6 +33,8 @@ import org.bukkit.plugin.Plugin;
 public class BukkitWorldManager
 implements WorldManager {
     private static final String MARKER = ".manhunt-owned";
+    private static final DateTimeFormatter GAME_NAME_FORMAT =
+            DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSS", Locale.ROOT);
     private final Plugin plugin;
     private final PluginConfig config;
     private final Logger logger;
@@ -95,7 +98,7 @@ implements WorldManager {
         if (this.gameWorld != null || this.gameWorldNether != null || this.gameWorldTheEnd != null) {
             throw new IllegalStateException("A previous ManHunt world set is still loaded");
         }
-        String id = UUID.randomUUID().toString().replace("-", "").substring(0, 12).toLowerCase(Locale.ROOT);
+        String id = "game_" + GAME_NAME_FORMAT.format(LocalDateTime.now());
         long seed = this.config.isRandomSeed() ? new Random().nextLong() : this.config.getWorldSeed();
         this.logger.info("Creating temporary ManHunt world set " + id + " with seed " + seed);
         ArrayList<Path> created = new ArrayList<Path>();

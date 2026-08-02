@@ -1,8 +1,13 @@
 # Changelog
 
+## 1.0.3 - 2026-08-02
+
+- Use timestamp-based temporary world names.
+- Keep the hunter compass movable in the inventory and offhand while blocking drops and containers.
+
+
 ## 1.0.2 - 2026-08-02
 
-- Isolated advancement progress during matches and restored it when the match ends.
 - Added an enchanted, protected hunter compass with per-world runner tracking.
 - Allowed the hunter compass to move freely, including the offhand, while preventing drops.
 - Separated player and administrator help output.

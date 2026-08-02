@@ -21,6 +21,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -78,6 +83,65 @@ implements Listener {
                 && this.compassService.isHunterCompass(event.getItemDrop().getItemStack())) {
             event.setCancelled(true);
         }
+    }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        if (!(event.getWhoClicked() instanceof Player player)
+                || this.compassService == null
+                || !this.compassService.shouldProtect(player)
+                || !isContainerInventory(event.getView().getTopInventory().getType())) {
+            return;
+        }
+
+        if (this.compassService.isHunterCompass(event.getCursor())) {
+            event.setCancelled(true);
+            return;
+        }
+
+        if (event.getClickedInventory() == player.getInventory()
+                && event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY
+                && this.compassService.isHunterCompass(event.getCurrentItem())) {
+            event.setCancelled(true);
+            return;
+        }
+
+        if (event.getClickedInventory() == event.getView().getTopInventory()
+                && event.getClick().isKeyboardClick()) {
+            if (event.getClick() == ClickType.NUMBER_KEY
+                    && event.getHotbarButton() >= 0
+                    && this.compassService.isHunterCompass(player.getInventory().getItem(event.getHotbarButton()))) {
+                event.setCancelled(true);
+            } else if (event.getClick() == ClickType.SWAP_OFFHAND
+                    && this.compassService.isHunterCompass(player.getInventory().getItemInOffHand())) {
+                event.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onInventoryDrag(InventoryDragEvent event) {
+        if (!(event.getWhoClicked() instanceof Player player)
+                || this.compassService == null
+                || !this.compassService.shouldProtect(player)
+                || !isContainerInventory(event.getView().getTopInventory().getType())
+                || !this.compassService.isHunterCompass(event.getOldCursor())) {
+            return;
+        }
+
+        int topSize = event.getView().getTopInventory().getSize();
+        if (event.getRawSlots().stream().anyMatch(slot -> slot < topSize)) {
+            event.setCancelled(true);
+        }
+    }
+
+    private static boolean isContainerInventory(InventoryType type) {
+        return switch (type) {
+            case CHEST, DISPENSER, DROPPER, FURNACE, BREWING, ENDER_CHEST,
+                    HOPPER, SHULKER_BOX, BARREL, BLAST_FURNACE, SMOKER,
+                    JUKEBOX, COMPOSTER, CHISELED_BOOKSHELF, SHELF, CRAFTER -> true;
+            default -> false;
+        };
     }
 
 
