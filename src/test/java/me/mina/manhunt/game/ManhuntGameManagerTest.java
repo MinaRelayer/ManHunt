@@ -193,6 +193,24 @@ class ManhuntGameManagerTest {
     }
 
     @Test
+    void winnerKeepsScoreboardUntilStop() {
+        this.startAndCompleteGame();
+
+        this.game.onEnderDragonDeath();
+
+        Assertions.assertEquals((Object)GameState.ENDED, (Object)this.game.getGameState());
+        Assertions.assertEquals((int)0, (int)this.scoreboard.stopCount);
+        Assertions.assertEquals((int)1, (int)this.scoreboard.freezeCount);
+        Assertions.assertTrue((boolean)this.scoreboard.frozen);
+        Assertions.assertTrue((boolean)this.scoreboard.started);
+
+        this.game.endGame();
+
+        Assertions.assertEquals((int)1, (int)this.scoreboard.stopCount);
+        Assertions.assertFalse((boolean)this.scoreboard.started);
+    }
+
+    @Test
     void runnerQuitInsideGracePeriodStaysAlive() {
         this.startAndCompleteGame();
         this.team.removeOnline(this.runner);

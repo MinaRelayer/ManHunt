@@ -11,6 +11,9 @@ public interface ScoreboardManager {
 
     public void stop();
 
+    default public void freeze() {
+    }
+
     public void applyToAll();
 
     default public void start(long startTime, Collection<Player> participants) {

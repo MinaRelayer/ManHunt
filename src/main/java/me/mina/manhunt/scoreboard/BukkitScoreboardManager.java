@@ -44,7 +44,9 @@ implements ScoreboardManager {
     private final Map<UUID, Scoreboard> previousBoards = new HashMap<UUID, Scoreboard>();
     private BukkitTask task;
     private long startTime;
+    private long frozenElapsedMillis;
     private boolean active;
+    private boolean frozen;
 
     public BukkitScoreboardManager(Plugin plugin, TeamManager teamManager, LangManager langManager, PluginConfig config) {
         this.plugin = plugin;
@@ -62,7 +64,9 @@ implements ScoreboardManager {
     public void start(long startTime, Collection<Player> participants) {
         this.stop();
         this.startTime = startTime;
+        this.frozenElapsedMillis = 0L;
         this.active = true;
+        this.frozen = false;
         for (Player player : participants) {
             this.createBoard(player);
         }
@@ -114,7 +118,7 @@ implements ScoreboardManager {
         this.syncTeams(board);
         TeamType type = this.teamManager.getTeam(viewer);
         String role = this.langManager.getRaw("team-" + type.getConfigKey());
-        String time = this.formatTime(System.currentTimeMillis() - this.startTime);
+        String time = this.formatTime(this.elapsedMillis());
         String alive = String.valueOf(this.teamManager.tracker().getAliveRunnerIds().size());
         board.getTeam(this.teamName(TeamType.HUNTER)).prefix(this.langManager.getComponentWithoutPrefix("team-hunter-prefix", new Object[0]));
         board.getTeam(this.teamName(TeamType.RUNNER)).prefix(this.langManager.getComponentWithoutPrefix("team-runner-prefix", new Object[0]));
@@ -170,6 +174,13 @@ implements ScoreboardManager {
         return String.format(Locale.ROOT, "%02d:%02d:%02d", hours, minutes, secs);
     }
 
+    private long elapsedMillis() {
+        if (this.frozen) {
+            return this.frozenElapsedMillis;
+        }
+        return System.currentTimeMillis() - this.startTime;
+    }
+
     @Override
     public void applyToAll() {
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -189,8 +200,24 @@ implements ScoreboardManager {
     }
 
     @Override
+    public void freeze() {
+        if (!this.active || this.frozen) {
+            return;
+        }
+        this.frozenElapsedMillis = Math.max(0L, System.currentTimeMillis() - this.startTime);
+        this.frozen = true;
+        this.update();
+        if (this.task != null) {
+            this.task.cancel();
+            this.task = null;
+        }
+    }
+
+    @Override
     public void stop() {
         this.active = false;
+        this.frozen = false;
+        this.frozenElapsedMillis = 0L;
         if (this.task != null) {
             this.task.cancel();
             this.task = null;

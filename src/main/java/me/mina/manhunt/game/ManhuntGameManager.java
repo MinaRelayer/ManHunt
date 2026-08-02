@@ -211,7 +211,7 @@ implements GameManager {
         String subKey = teamType == TeamType.RUNNER ? "title-victory-runner-sub" : "title-victory-hunter-sub";
         this.showTitleToAll(titleKey, subKey, 100);
         this.broadcast(this.langManager.getComponent(teamType == TeamType.RUNNER ? "game-winner-runner" : "game-winner-hunter", new Object[0]));
-        this.scoreboardManager.stop();
+        this.scoreboardManager.freeze();
         for (Player player : this.bridge.getOnlinePlayers()) {
             if (!this.participants.contains(player.getUniqueId())) continue;
             player.setGameMode(GameMode.SPECTATOR);

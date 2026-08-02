@@ -9,10 +9,13 @@ A Hunter-vs-Runner mini-game plugin for Minecraft Paper 26.1.2.
 - Temporary Paper namespaced worlds under the primary world's `dimensions` directory.
 - Safe ownership markers, path validation, and asynchronous cleanup.
 - Full player-state isolation and restoration.
+- Advancement progress is isolated during matches and restored on `/mh stop`.
 - Runner disconnect grace period.
 - Ender Dragon victory detection limited to the match End.
+- Hunters receive a protected enchanted compass that tracks the nearest Runner.
 - Player-local scoreboard showing role, time, and alive Runners without visible row numbers.
 - `/mh tp` is restricted to Spectators during an active match.
+- Player and administrator help output is separated.
 - English and Simplified Chinese localization.
 - Optional PlaceholderAPI expansion.
 
@@ -24,7 +27,7 @@ A Hunter-vs-Runner mini-game plugin for Minecraft Paper 26.1.2.
 
 ## Installation
 
-1. Build or download `ManHunt-1.0.1.jar`.
+1. Build or download `ManHunt-1.0.2.jar`.
 2. Copy it into the server `plugins` directory.
 3. Start the server once and edit `plugins/ManHunt/config.yml` if needed.
 4. Restart the server after changing world or match settings.
@@ -112,7 +115,7 @@ Linux/macOS:
 Output:
 
 ```text
-build/libs/ManHunt-1.0.1.jar
+build/libs/ManHunt-1.0.2.jar
 ```
 
 ## Releases
@@ -124,8 +127,8 @@ Every push to `main` publishes or updates the GitHub Release for the version in 
 3. Push `main`; you may also create and push a matching version tag, for example:
 
 ```bash
-git tag v1.0.1
-git push origin v1.0.1
+git tag v1.0.2
+git push origin v1.0.2
 ```
 
 The combined GitHub Actions workflow validates the tag, runs the tests, builds the plugin, and attaches `ManHunt-<version>.jar` to the GitHub Release with generated release notes.

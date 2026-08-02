@@ -5,6 +5,7 @@ package me.mina.manhunt.listener;
 
 import me.mina.manhunt.game.GameManager;
 import me.mina.manhunt.game.GameState;
+import me.mina.manhunt.game.HunterCompassService;
 import me.mina.manhunt.game.RespawnIntent;
 import me.mina.manhunt.team.TeamManager;
 import me.mina.manhunt.team.TeamType;
@@ -23,6 +24,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.plugin.Plugin;
 
 public class ManhuntListener
@@ -31,12 +33,14 @@ implements Listener {
     private final GameManager gameManager;
     private final TeamManager teamManager;
     private final WorldManager worldManager;
+    private final HunterCompassService compassService;
 
-    public ManhuntListener(Plugin plugin, GameManager gameManager, TeamManager teamManager, WorldManager worldManager) {
+    public ManhuntListener(Plugin plugin, GameManager gameManager, TeamManager teamManager, WorldManager worldManager, HunterCompassService compassService) {
         this.plugin = plugin;
         this.gameManager = gameManager;
         this.teamManager = teamManager;
         this.worldManager = worldManager;
+        this.compassService = compassService;
     }
 
     @EventHandler
@@ -48,6 +52,10 @@ implements Listener {
         }
         if (!this.gameManager.isParticipant(player) || !this.worldManager.isGameWorld(player.getWorld())) {
             return;
+        }
+        if (this.compassService != null) {
+            event.getDrops().removeIf(this.compassService::isHunterCompass);
+            this.compassService.onPlayerDeath(player);
         }
         TeamType team = this.teamManager.getTeam(player);
         if (state == GameState.ENDED || team == TeamType.SPECTATOR) {
@@ -62,6 +70,16 @@ implements Listener {
             this.teamManager.tracker().setRespawnIntent(player.getUniqueId(), RespawnIntent.SPECTATOR);
         }
     }
+
+    @EventHandler
+    public void onPlayerDropItem(PlayerDropItemEvent event) {
+        if (this.compassService != null
+                && this.compassService.shouldProtect(event.getPlayer())
+                && this.compassService.isHunterCompass(event.getItemDrop().getItemStack())) {
+            event.setCancelled(true);
+        }
+    }
+
 
     @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent event) {

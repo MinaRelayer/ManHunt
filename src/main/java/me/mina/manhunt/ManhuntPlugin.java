@@ -10,6 +10,7 @@ import me.mina.manhunt.command.PlayerResolver;
 import me.mina.manhunt.config.PluginConfig;
 import me.mina.manhunt.game.BukkitServerBridge;
 import me.mina.manhunt.game.GameManager;
+import me.mina.manhunt.game.HunterCompassService;
 import me.mina.manhunt.game.ManhuntGameManager;
 import me.mina.manhunt.lang.LangManager;
 import me.mina.manhunt.lang.YamlLangManager;
@@ -33,6 +34,7 @@ extends JavaPlugin {
     private BukkitWorldManager worldManager;
     private ScoreboardManager scoreboardManager;
     private GameManager gameManager;
+    private HunterCompassService compassService;
 
     public void onEnable() {
         this.saveDefaultConfig();
@@ -49,21 +51,27 @@ extends JavaPlugin {
         this.worldManager = new BukkitWorldManager((Plugin)this, this.config);
         this.worldManager.cleanupOrphanedWorlds();
         this.scoreboardManager = new BukkitScoreboardManager((Plugin)this, this.teamManager, this.langManager, this.config);
-        this.gameManager = new ManhuntGameManager(new BukkitServerBridge((Plugin)this), this.teamManager, this.worldManager, this.scoreboardManager, this.langManager, this.config);
+        BukkitServerBridge bridge = new BukkitServerBridge((Plugin)this);
+        this.gameManager = new ManhuntGameManager(bridge, this.teamManager, this.worldManager, this.scoreboardManager, this.langManager, this.config);
+        this.compassService = new HunterCompassService((Plugin)this, this.gameManager, this.teamManager, this.worldManager, bridge);
+        this.compassService.start();
         PlayerResolver playerResolver = Bukkit::getPlayerExact;
         ManhuntCommand command = new ManhuntCommand(this.gameManager, this.teamManager, this.langManager, playerResolver, this::reloadAll);
         command.register((LifecycleEventManager<Plugin>)this.getLifecycleManager());
-        this.getServer().getPluginManager().registerEvents((Listener)new ManhuntListener((Plugin)this, this.gameManager, this.teamManager, this.worldManager), (Plugin)this);
+        this.getServer().getPluginManager().registerEvents((Listener)new ManhuntListener((Plugin)this, this.gameManager, this.teamManager, this.worldManager, this.compassService), (Plugin)this);
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new ManhuntPlaceholderExpansion((Plugin)this, this.gameManager, this.teamManager).register();
             this.getLogger().info("PlaceholderAPI expansion registered.");
         } else {
-            this.getLogger().warning(this.langManager.toPlain(this.langManager.getRaw("placeholderapi-not-found")));
+            this.getLogger().warning("PlaceholderAPI not detected; placeholders are unavailable.");
         }
         this.getLogger().info("ManHunt plugin enabled.");
     }
 
     public void onDisable() {
+        if (this.compassService != null) {
+            this.compassService.stop();
+        }
         if (this.gameManager != null) {
             this.getLogger().info("Performing shutdown cleanup (worlds, player state)...");
             this.gameManager.shutdown();

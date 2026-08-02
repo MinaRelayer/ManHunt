@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "me.mina.manhunt"
-version = "1.0.1"
+version = providers.gradleProperty("version").get()
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(25))

@@ -9,7 +9,9 @@ public class FakeScoreboardManager
 implements ScoreboardManager {
     public int startCount = 0;
     public int stopCount = 0;
+    public int freezeCount = 0;
     public boolean started = false;
+    public boolean frozen = false;
 
     public void start() {
         ++this.startCount;
@@ -19,6 +21,12 @@ implements ScoreboardManager {
     public void stop() {
         ++this.stopCount;
         this.started = false;
+        this.frozen = false;
+    }
+
+    public void freeze() {
+        ++this.freezeCount;
+        this.frozen = true;
     }
 
     public void applyToAll() {

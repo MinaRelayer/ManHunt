@@ -27,6 +27,7 @@ public final class PlayerStateService {
     public void prepareForGame(Player player) {
         if (player.getInventory() != null) {
             player.getInventory().clear();
+            player.getInventory().setItemInOffHand(null);
         }
         player.setHealth(player.getMaxHealth());
         player.setFoodLevel(20);
