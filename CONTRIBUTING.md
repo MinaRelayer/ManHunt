@@ -23,4 +23,4 @@ git tag v<version>
 git push origin v<version>
 ```
 
-GitHub Actions will verify the version, run `clean test jar`, and publish the generated JAR as a GitHub Release.
+The combined GitHub Actions workflow will verify the version, run `clean test jar`, and publish the generated JAR as a GitHub Release.

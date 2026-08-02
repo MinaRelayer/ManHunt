@@ -128,7 +128,7 @@ git tag v1.0.1
 git push origin v1.0.1
 ```
 
-The release workflow validates that the tag matches the Gradle project version, runs the tests, builds the plugin, and attaches `ManHunt-<version>.jar` to the GitHub Release with generated release notes.
+The combined GitHub Actions workflow validates the tag, runs the tests, builds the plugin, and attaches `ManHunt-<version>.jar` to the GitHub Release with generated release notes.
 
 ## License
 
