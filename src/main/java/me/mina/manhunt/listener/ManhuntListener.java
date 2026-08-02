@@ -41,15 +41,18 @@ implements Listener {
 
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
-        if (this.gameManager.getGameState() != GameState.RUNNING) {
+        Player player = event.getEntity();
+        GameState state = this.gameManager.getGameState();
+        if (state != GameState.RUNNING && state != GameState.ENDED) {
             return;
         }
-        Player player = event.getEntity();
         if (!this.gameManager.isParticipant(player) || !this.worldManager.isGameWorld(player.getWorld())) {
             return;
         }
         TeamType team = this.teamManager.getTeam(player);
-        if (team == TeamType.RUNNER) {
+        if (state == GameState.ENDED || team == TeamType.SPECTATOR) {
+            this.teamManager.tracker().setRespawnIntent(player.getUniqueId(), RespawnIntent.SPECTATOR);
+        } else if (team == TeamType.RUNNER) {
             this.teamManager.markDead(player);
             this.teamManager.tracker().setRespawnIntent(player.getUniqueId(), RespawnIntent.SPECTATOR);
             this.gameManager.onRunnerDeath();
@@ -64,7 +67,10 @@ implements Listener {
     public void onPlayerRespawn(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
         RespawnIntent intent = this.teamManager.tracker().getAndClearRespawnIntent(player.getUniqueId());
-        if (intent == RespawnIntent.NONE || this.gameManager.getGameState() != GameState.RUNNING || !this.gameManager.isParticipant(player)) {
+        GameState state = this.gameManager.getGameState();
+        if (intent == RespawnIntent.NONE
+                || state != GameState.RUNNING && state != GameState.ENDED
+                || !this.gameManager.isParticipant(player)) {
             return;
         }
         World gameWorld = this.worldManager.getGameWorld();
@@ -77,7 +83,9 @@ implements Listener {
         }
         GameMode mode = intent == RespawnIntent.SURVIVAL ? GameMode.SURVIVAL : GameMode.SPECTATOR;
         Bukkit.getScheduler().runTask(this.plugin, () -> {
-            if (this.gameManager.getGameState() == GameState.RUNNING && this.gameManager.isParticipant(player)) {
+            GameState currentState = this.gameManager.getGameState();
+            if ((currentState == GameState.RUNNING || currentState == GameState.ENDED)
+                    && this.gameManager.isParticipant(player)) {
                 player.setGameMode(mode);
             }
         });
