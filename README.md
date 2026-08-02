@@ -117,11 +117,11 @@ build/libs/ManHunt-1.0.1.jar
 
 ## Releases
 
-Every version is published as a GitHub Release. To publish a new version:
+Every push to `main` publishes or updates the GitHub Release for the version in `gradle.properties`. To publish a new version:
 
 1. Update `version` in `gradle.properties` and the matching changelog entry.
 2. Run the complete verification suite.
-3. Create and push a version tag, for example:
+3. Push `main`; you may also create and push a matching version tag, for example:
 
 ```bash
 git tag v1.0.1
